@@ -6,7 +6,7 @@ https://www.bilibili.com/video/BV13h411p7oC
 由于本人水平一般，大佬轻喷。
 部分代码来源于网络。
 
-文字版教程请打开对应名字文件，例如
-P3的文字版教程 打开P3_About
-P4的文字版教程 打开P4_About
-P4的额外补充内容(如果有) 打开P4_Extra
+文字版教程请打开对应名字文件，例如/r/n
+P3的文字版教程 打开P3_About /r/n
+P4的文字版教程 打开P4_About /r/n
+P4的额外补充内容(如果有) 打开P4_Extra /r/n
