@@ -1,0 +1,39 @@
+using 导入命名空间/包/类/对象等
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+
+public class 这里是Class名，Class名请与文件名一致 : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+        //在脚本第一次被加载时，这里的代码会被运行
+        //两个斜杠是一段注释
+        
+        //UnityEngine.Debug.Log(String);
+        //在括号里填入文字，使用英文双引号包围。当这条代码触发时，你将在Unity控制台看到你填的文字。
+        //例如，经典的Hello World
+        //UnityEngine.Debug.Log("Hello World")
+        
+        //SceneManager.LoadScene(Path);
+        //SceneManager.LoadSceneAsync(Path);
+        //所有的Scene界面请放进Asset/Scene文件夹下
+        //Path是Scene文件夹下的相对路径，无需带后缀。当这条代码触发时，游戏将会切换到对应的Scene;
+        //例如，你想要切换到 Asset/Scene/OrangeSun 这个叫OrangeSun的Scene，则代码为
+        //SceneManager.LoadScene("OrangeSun");
+           
+        UnityEngine.Debug.Log("Start()方法被触发了");
+        SceneManager.LoadSceneAsync("MainGame");
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+      //在游戏内每过去一帧时，这里的代码将会运行。
+        
+    }
+}
