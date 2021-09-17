@@ -82,9 +82,9 @@ public class TextGo : MonoBehaviour
         //第三部分是颜色信息，这是自定义的部分
         
         //我自定义的原始文本是 ？color?red?文本@变色@文本
-        ？color用于在textFix()中，展示color效果
-        ？red 表示颜色，也就是这里的String color = tempList[2];
-        @变色@ 表示要变色的文本
+        //？color用于在textFix()中，展示color效果
+        //？red 表示颜色，也就是这里的String color = tempList[2];
+        //@变色@ 表示要变色的文本
 
         int length = tempList.Length;
         //当剧情文本无问号时length = 4;即分成四份
@@ -107,9 +107,13 @@ public class TextGo : MonoBehaviour
         counter += 1;
         return;
     }
+    
+    //此方法会返回 当前counter行 chapter章 的 剧情部分文本 
+    //如果使用了 ？color 则返回空文本，color部分是单独设计的，如果用不到建议不用。
     private string textUpdate()
     {
         String content = "";
+        //章节选择功能
         if(whichChapter == 0)
         {
             content = chapter0[counter];
@@ -130,8 +134,11 @@ public class TextGo : MonoBehaviour
         {
             UnityEngine.Debug.Log("章节不存在");
         }
+        
+        //中英符号统一化，方便一些
         content = content.Replace("？", "?");
         if (content.StartsWith("?"))
+        //如果问号开头，持续进行textFix();直到不是问号开头为止。
         {
             do
             {
@@ -142,34 +149,45 @@ public class TextGo : MonoBehaviour
         return content;
     }
 
+    //这部分用于处理?开头的文本 P7会更新这里
     private string textFix(string content)
     {
+        //如果是注释，就counter+1，返回到 while循环。
         if (content.StartsWith("?注释?"))
         {
             counter += 1;
         }
+        //如果是 颜色 文本， 就进入颜色文本模式
         if (content.StartsWith("?color?"))
         {
-            //粉色
+            //一般我们只用到一两个颜色，所以每个分开做一个if会比较好。
+            //如果你要用到很多，那就使用split()方法取得color文本就好了。
+            //红色
             if (content.StartsWith("?color?red?"))
             {
+            //如果 有颜色的 打字机效果已经在运行了，返回空值，防止无限循环。
                 if (isColorful)
                 {
                     return "";
                 }
+                //除掉?color?red?
+                //分离变色部分和不变色部分
                 content = content.Replace("?color?red?", "");
                 String[] temp = content.Split('@');
+                //调整状态为真
+                //开始进行 有颜色的 打字机效果。
                 isColorful = true;
                 StartCoroutine(textColorfulEffect(temp,"red"));
             }
-
- 
         }
+        //返回文本用于循环(正确使用的话，这里会进行一次套娃，不过要小心无限套娃，）
         return textUpdate();
     }
 
     private void textUpload(string content)
     {
+    //直接更新文本（而不是用打字机效果)
+    //如果是有色文本，改一下状态
         if (isColorful)
         {
             isColorful = false;
@@ -178,9 +196,12 @@ public class TextGo : MonoBehaviour
         text.GetComponent<Text>().text = content;
     }
 
+    //有色打字机效果
     private IEnumerator textColorfulEffect(String[] balabala,String color)
     {
+        //状态改变，部分代码请看textEffect();我就不打两遍文字提示了
         isEffect = true;
+        isColorful = false;
         text.GetComponent<Text>().text = "";
         //需要变色之前的文本
         foreach (var i in balabala[0].ToCharArray())
@@ -202,25 +223,35 @@ public class TextGo : MonoBehaviour
             text.GetComponent<Text>().text += i;
             yield return new WaitForSeconds(textSpeed);
         }
+        //状态改变
+        isColorful = false;//这一行我在视频里忘加了，这里补一下，虽然不太重要。
         isEffect = false;
     }
 
+    //打字机效果
     public IEnumerator textEffect(String balabala)
     {
+    //打字机状态开启
         isEffect = true;
+        //先把对话框的文本归零，然后一个字一个字往上加。
         text.GetComponent<Text>().text = "";
                 foreach (var i in balabala.ToCharArray())
                  {
                       text.GetComponent<Text>().text += i;
                       yield return new WaitForSeconds(textSpeed);
         }
+        //加完了，状态关闭
         isEffect = false;
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        //导入text物体（UI控件）
         text = GameObject.Find("Context");
+        
+        //导入文本资源
+        //把文本资源按行分割，并储存在String[] chapter中
         TextAsset a  = Resources.Load("chapter0") as TextAsset;
         chapter0 = a.text.Split('\n');
 
