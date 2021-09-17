@@ -1,0 +1,229 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Net.Mime;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class TextGo : MonoBehaviour
+{
+    //text物体(UI控件)
+    public GameObject text;
+    
+    //当前章节(默认第0章——序章)
+    public static int whichChapter = 0;
+    
+    //第0章的文本(默认按行分割)
+    public string[] chapter0;
+    //当前是第几行文本(默认为第0行，也就是从上到下的第一行)
+    public static int counter = 0;
+    //文本打字机的速度
+    public static float textSpeed = 0.01f;
+    //当前是否在打字机状态
+    public bool isEffect;
+    //当前是否在 带颜色的 打字机状态
+    public bool isColorful;
+
+    //On Click()按钮点击事件
+    public void balabala()
+    { 
+    //捕捉异常
+         try
+        {
+            if (isColorful)
+            {
+            //如果目前正在 带颜色的 打字机状态
+            //运行stopColorful()
+                stopColorful();
+                return;
+            }
+            if (isEffect == true)
+                {
+            //如果目前正在打字机状态
+                    counter -= 1;
+                    //退回到原来的文本，停止打字，修改状态isEffect为否，一次性更新全部文本textUpload(text);
+                    StopAllCoroutines();
+                    isEffect = false;
+                    textUpload(textUpdate());
+                    //计数器加一
+                    counter += 1;
+                    return;
+                }
+                else
+                {
+                //如果目前没在打字机状态
+                //开始打字机效果
+                    StartCoroutine(textEffect(textUpdate()));
+                }
+            counter += 1;
+        }
+        catch (IndexOutOfRangeException)
+        {
+        //防止出现报错提示
+            return;
+        }
+        
+    }
+
+    private void stopColorful()
+    {
+    //停止 带颜色的 打字机效果
+    //并一次性更新全部文本。
+        counter -= 1;
+        StopAllCoroutines();
+        isColorful = false;
+        isEffect = false;
+
+        //这里需要补一下现在是哪个章节,即if(whichChapter == x)
+        String temp = chapter0[counter];
+        String[] tempList = temp.Split('?');
+        //此时temp为原文本，用?分隔成tempList用于筛选需要的文本。
+        String color = tempList[2];
+        //第三部分是颜色信息，这是自定义的部分
+        
+        //我自定义的原始文本是 ？color?red?文本@变色@文本
+        ？color用于在textFix()中，展示color效果
+        ？red 表示颜色，也就是这里的String color = tempList[2];
+        @变色@ 表示要变色的文本
+
+        int length = tempList.Length;
+        //当剧情文本无问号时length = 4;即分成四份
+        //把剧情文本放到temp里
+        temp = "";
+        for (int a = 3; a<length; a=a+1){
+            temp += tempList[a];
+        }
+        //按照@符号，分割需要变色的部分 和 不需要变色的部分。
+        tempList = temp.Split('@');
+        //仅仅有两个@的句子
+        if(tempList.Length == 3)
+        {
+            temp = tempList[0] + "<color=" + color + ">" + tempList[1] + "</color>" + tempList[2];
+        }
+        //其他暂时不考虑，请自行设计
+        //UnityEngine.Debug.Log(temp);
+        //更新文本
+        text.GetComponent<Text>().text= temp;
+        counter += 1;
+        return;
+    }
+    private string textUpdate()
+    {
+        String content = "";
+        if(whichChapter == 0)
+        {
+            content = chapter0[counter];
+        }
+        else if(whichChapter == 1)
+        {
+            //content = chapter1[counter];
+        }
+        else if (whichChapter == 2)
+        {
+            //content = chapter2[counter];
+        }
+        else if (whichChapter == 3)
+        {
+            //content = chapter3[counter];
+        }
+        else
+        {
+            UnityEngine.Debug.Log("章节不存在");
+        }
+        content = content.Replace("？", "?");
+        if (content.StartsWith("?"))
+        {
+            do
+            {
+                content = textFix(content);
+            } while (content.StartsWith("?"));
+        }
+
+        return content;
+    }
+
+    private string textFix(string content)
+    {
+        if (content.StartsWith("?注释?"))
+        {
+            counter += 1;
+        }
+        if (content.StartsWith("?color?"))
+        {
+            //粉色
+            if (content.StartsWith("?color?red?"))
+            {
+                if (isColorful)
+                {
+                    return "";
+                }
+                content = content.Replace("?color?red?", "");
+                String[] temp = content.Split('@');
+                isColorful = true;
+                StartCoroutine(textColorfulEffect(temp,"red"));
+            }
+
+ 
+        }
+        return textUpdate();
+    }
+
+    private void textUpload(string content)
+    {
+        if (isColorful)
+        {
+            isColorful = false;
+            return;
+        }
+        text.GetComponent<Text>().text = content;
+    }
+
+    private IEnumerator textColorfulEffect(String[] balabala,String color)
+    {
+        isEffect = true;
+        text.GetComponent<Text>().text = "";
+        //需要变色之前的文本
+        foreach (var i in balabala[0].ToCharArray())
+        {
+            text.GetComponent<Text>().text += i;
+            yield return new WaitForSeconds(textSpeed);
+        }
+        //需要变色的文本
+        foreach (var i in balabala[1].ToCharArray())
+        {
+            text.GetComponent<Text>().text += "<color="+color+">";
+            text.GetComponent<Text>().text += i;
+            text.GetComponent<Text>().text += "</color>";
+            yield return new WaitForSeconds(textSpeed);
+        }
+        //剩下的文本。如果你想做两段变色请自行设计
+        foreach (var i in balabala[2].ToCharArray())
+        {
+            text.GetComponent<Text>().text += i;
+            yield return new WaitForSeconds(textSpeed);
+        }
+        isEffect = false;
+    }
+
+    public IEnumerator textEffect(String balabala)
+    {
+        isEffect = true;
+        text.GetComponent<Text>().text = "";
+                foreach (var i in balabala.ToCharArray())
+                 {
+                      text.GetComponent<Text>().text += i;
+                      yield return new WaitForSeconds(textSpeed);
+        }
+        isEffect = false;
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        text = GameObject.Find("Context");
+        TextAsset a  = Resources.Load("chapter0") as TextAsset;
+        chapter0 = a.text.Split('\n');
+
+        balabala();
+    }
+}
